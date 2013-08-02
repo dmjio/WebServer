@@ -55,18 +55,18 @@ req = P8.takeWhile (== ' ')  *>
 ver :: Parser HTTPVersion
 ver = HTTP11 <$ string "HTTP/1.1"
  <|>  HTTP10 <$ string "HTTP/1.0"
- <|>  HTTP09 <$ string "HTTP/0.9" <* endOfLine
+ <|>  HTTP09 <$ string "HTTP/0.9"
 
 uri :: Parser URI
 uri = AbURI <$> (string "http://" *> P8.takeWhile1 (/= ' ') <* space)
-      <|> Asterisk <$ char '*' <* space
+      <|> Asterisk <$ char '*' <* space -- The asterisk "*" means that the request does not apply to a particular resource, but to the server itself
       <|> AbPath <$> (char '/' *> P8.takeWhile1 (/= ' ') <* space)
       <|> Authority <$> (char '/' *> P8.takeWhile1 (/= ' ') <* space)
 
 --P8.space *> P8.takeWhile1 (/= ' ') <* char8 ' '
 
 request :: Parser Request
-request = Request <$> req <*> uri <*> ver
+request = Request <$> req <*> uri <*> ver <* endOfLine
 
 url :: ByteString
 url = "OPTIONS * HTTP/1.1\n"
@@ -76,6 +76,17 @@ main = do
   case parse request url of
     Done _ y -> print y
     otherwise -> print "uh oh"
+
+-- handle url encoding?
+-- handle query string parameters?
+-- authority?
+-- make proper project layout
+-- tests?
+
+-- RESOURCE ROUTING
+-- 1. If Request-URI is an absoluteURI, the host is part of the Request-URI. Any Host header field value in the request MUST be ignored.
+-- 2. If the Request-URI is not an absoluteURI, and the request includes a Host header field, the host is determined by the Host header field value.
+-- 3. If the host as determined by rule 1 or 2 is not a valid host on the server, the response MUST be a 400 (Bad Request) error message.
 
 
 
