@@ -6,6 +6,7 @@ import           Control.Applicative   hiding (many)
 import           Data.Attoparsec       as P
 import           Data.Attoparsec.Char8 as P8
 import           Data.ByteString.Char8 hiding (putStrLn)
+import           ParserHeaders
 
 -- GET / HTTP/1.1  <---- Request Line parser
 -- Host: localhost:8080 <---- parsing host...
@@ -17,7 +18,12 @@ import           Data.ByteString.Char8 hiding (putStrLn)
 -- Connection: keep-alive
 
 -- | Request Data Type, contains a method, uri and version
-data Request = Request
+data Request = Request { reqLine    :: RequestLine,
+                         reqHeaders :: [Header],
+                         reqBody    :: !ByteString
+                       } deriving Show
+
+data RequestLine = RequestLine
     { requestMethod  :: Method -- ^ Method
     , requestUri     :: URI -- ^ URI
     , requestVersion :: HTTPVersion -- ^ Version
@@ -65,8 +71,8 @@ uri = AbURI <$> (string "http://" *> P8.takeWhile1 (/= ' ') <* space)
 
 --P8.space *> P8.takeWhile1 (/= ' ') <* char8 ' '
 
-request :: Parser Request
-request = Request <$> req <*> uri <*> ver <* endOfLine
+request :: Parser RequestLine
+request = RequestLine <$> req <*> uri <*> ver <* endOfLine
 
 url :: ByteString
 url = "OPTIONS * HTTP/1.1\n"

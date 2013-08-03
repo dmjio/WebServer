@@ -1,8 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- brew install httperf
--- httperf --server=localhost --port=5002 --uri=/ --num-conns=10000
-
 import           Control.Concurrent         (forkIO)
 import           Control.Exception
 import           Data.ByteString.Lazy       (ByteString)
