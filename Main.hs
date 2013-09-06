@@ -1,14 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+import           AcceptRanges               hiding (main)
+import           Control.Applicative
 import           Control.Concurrent         (forkIO)
 import           Control.Exception
-import           Data.ByteString.Lazy       (ByteString)
+import           Data.Attoparsec
+import           Data.ByteString.Lazy       (ByteString, toStrict)
 import qualified Data.ByteString.Lazy.Char8 as BC
 import           Network
+import           RequestParser
 import           System.Environment         (getArgs)
 import           System.IO                  (Handle, hClose, stdout)
 import           System.IO.Unsafe
-
 main :: IO ()
 main = do
   args <- getArgs
@@ -26,8 +29,12 @@ socHandler soc = do
 process :: Handle -> IO ()
 process handle = do
   dat <- BC.hGetContents handle
-  -- parse request....
-  x <- unsafeInterleaveIO (BC.hPutStrLn handle msg >> BC.hPutStrLn stdout dat)
+  let req = parseRequest (BC.toStrict dat)
+  x <- unsafeInterleaveIO $ do
+                   BC.hPutStrLn handle msg
+                   BC.hPutStrLn stdout dat
+                   print req
+--                   mapM_ print $ g (toStrict dat)
   evaluate x
   hClose handle -- for http10 only... 1.1 can do persistent
 
