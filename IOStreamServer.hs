@@ -59,7 +59,7 @@ createResponse (x, hs) = do
                   Just x -> x
                   Nothing -> ""
     if resource /= "" 
-    then do file <- C.readFile route                                  
+    then do file <- C.readFile resource
             return $! Response {
                            responseVersion = "HTTP/1.1"
                          , responseCode    = "200"
