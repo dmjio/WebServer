@@ -1,6 +1,7 @@
 ```shell
-$ ghc -threaded IOStreamServer.hs +RTS -N4 -o server
-$ ./IOStreamServer
+$ ghc -O2 -threaded IOStreamServer.hs -o server
+$ ./server +RTS -N8
+Listening on 3000
 $ curl http://localhost:3000 
 <!doctype html>
 <html>
